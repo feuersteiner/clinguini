@@ -1,4 +1,4 @@
-# clinguini
+# 🍝 clinguini
 
 A very tiny CLI builder. For me. Maybe for you.
 

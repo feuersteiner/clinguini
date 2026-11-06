@@ -42,8 +42,8 @@ import { runChecks } from '../checks.js';
 export const run = command({
 	name: 'run',
 	description: 'Run matching tests',
-	positionals: [
-		{ name: 'paths', type: 'string', required: false, variadic: true }
+	params: [
+		{ name: 'paths', type: 'string', optional: true, variadic: true }
 	],
 	flags: [
 		{
@@ -58,8 +58,8 @@ export const run = command({
 	utils: {
 		header: 'Running checks'
 	},
-	handler: async ({ positionals, flags }) => {
-		await runChecks({ paths: positionals.paths, ...flags });
+	handler: async ({ params, flags }) => {
+		await runChecks({ paths: params.paths, ...flags });
 	}
 });
 ```
@@ -73,23 +73,38 @@ import { addTest } from '../tests.js';
 export const add = command({
 	name: 'add',
 	description: 'Install a test',
-	positionals: [
-		{ name: 'id', type: 'string', required: true },
-		{ name: 'targetDir', type: 'string', required: false }
+	params: [
+		{ name: 'id', type: 'string' },
+		{ name: 'targetDir', type: 'string', optional: true }
 	],
-	handler: async ({ positionals }) => {
-		await addTest(positionals.id, positionals.targetDir);
+	handler: async ({ params }) => {
+		await addTest(params.id, params.targetDir);
 	}
 });
 ```
+
+Params are required by default. Set `optional: true` to make a param optional.
+
+Calling a command group without choosing a command displays that group's help.
+
+Flags are optional. Boolean flags are `false` when absent and `true` when supplied.
+String and number flags are `undefined` when absent, unless `default` is set.
+`shortForm` provides a single-letter alias. String and number values accept
+`--base main` or `--base=main`. Required flags are outside the current scope.
+
+Handlers can be sync or async and need no return value. Completion means success;
+throwing an error makes clinguini report its message and set exit code `1`.
+Invalid arguments are rejected before the handler runs, with exit code `2`.
+Handlers can print their own command output.
 
 `utils` groups built-in behaviors. Root settings provide defaults; individual commands
 can override them. `help` enables generated `--help` / `-h`; `verbose` enables the
 `--verbose` / `-v` flag. `header` optionally prints once at startup, using the selected
 command's setting. `color` accepts `'auto'`, `'always'` or `'never'`; auto uses color in
-interactive terminals. Logging stays internal to clinguini.
+interactive terminals. Clinguini's logging stays internal.
 
 ```sh
+agent-tests
 agent-tests run src/ tests/ --changed --concurrency 4
 agent-tests run --base=main
 agent-tests add no-informal-english apps/web

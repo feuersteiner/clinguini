@@ -11,7 +11,7 @@ The examples below describe the intended API.
 ## Usage
 
 Export commands from separate files using `command()`, then assemble them in the entry file.
-The helper preserves handler type inference without executing the command.
+The helper defines a command without executing it. The root configuration uses the same `Command` type.
 
 `index.ts`:
 
@@ -28,8 +28,7 @@ await clinguini(process.argv.slice(2), {
 	utils: {
 		help: true,
 		verbose: true,
-		header: '🍝 agent-tests',
-		color: 'auto'
+		header: '🍝 agent-tests'
 	}
 });
 ```
@@ -43,7 +42,7 @@ import { runChecks } from '../checks.js';
 export const run = command({
 	name: 'run',
 	description: 'Run matching tests',
-	params: [{ name: 'paths', type: 'string', optional: true, variadic: true }],
+	params: [{ name: 'path', optional: true }],
 	flags: [
 		{
 			name: 'changed',
@@ -58,7 +57,7 @@ export const run = command({
 		header: 'Running checks'
 	},
 	handler: async ({ params, flags }) => {
-		await runChecks({ paths: params.paths, ...flags });
+		await runChecks({ paths: params.path === undefined ? [] : [params.path], ...flags });
 	}
 });
 ```
@@ -72,17 +71,16 @@ import { addTest } from '../tests.js';
 export const add = command({
 	name: 'add',
 	description: 'Install a test',
-	params: [
-		{ name: 'id', type: 'string' },
-		{ name: 'targetDir', type: 'string', optional: true }
-	],
+	params: [{ name: 'id' }, { name: 'targetDir', optional: true }],
 	handler: async ({ params }) => {
+		if (params.id === undefined) throw new Error('Missing test id');
 		await addTest(params.id, params.targetDir);
 	}
 });
 ```
 
-Params are required by default. Set `optional: true` to make a param optional.
+Params are strings and required by default. Set `optional: true` to make a param optional.
+Each param accepts one value.
 
 Calling a command group without choosing a command displays that group's help.
 
@@ -95,16 +93,18 @@ Handlers can be sync or async and need no return value. Completion means success
 throwing an error makes clinguini report its message and set exit code `1`.
 Invalid arguments are rejected before the handler runs, with exit code `2`.
 Handlers can print their own command output.
+The `Handler` type receives `params` as a string-or-undefined record and `flags` as a
+string, number, boolean or undefined record. Narrow values when a specific type is needed.
+Flag defaults use `unknown` and are parsed according to the flag's `type`.
 
 `utils` groups built-in behaviors. Root settings provide defaults; individual commands
 can override them. `help` enables generated `--help` / `-h`; `verbose` enables the
 `--verbose` / `-v` flag. `header` optionally prints once at startup, using the selected
-command's setting. `color` accepts `'auto'`, `'always'` or `'never'`; auto uses color in
-interactive terminals. Clinguini's logging stays internal.
+command's setting. Clinguini's logging stays internal.
 
 ```sh
 agent-tests
-agent-tests run src/ tests/ --changed --concurrency 4
+agent-tests run src/ --changed --concurrency 4
 agent-tests run --base=main
 agent-tests add no-informal-english apps/web
 agent-tests run --help

@@ -139,7 +139,6 @@ agent-tests run --help
 ```sh
 bun install --frozen-lockfile
 bun run check
-bun run test
 bun run lint
 bun run format
 ```

@@ -4,8 +4,8 @@ A very tiny CLI builder. For me. Maybe for you.
 
 Native TypeScript. Node.js compatible. Zero runtime dependencies.
 
-**Status:** configuration types are defined; `index.ts` prints `hello from clinguini`.
-Helpers and command execution remain pending.
+**Status:** typed helper factories are implemented.
+CLI execution and built-in utilities remain unimplemented.
 The examples below describe the intended API.
 
 ## Usage

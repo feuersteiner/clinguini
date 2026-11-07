@@ -4,9 +4,8 @@ A very tiny CLI builder. For me. Maybe for you.
 
 Native TypeScript. Node.js compatible. Zero runtime dependencies.
 
-**Status:** public helper scaffold only; no published package yet.
-`index.ts` exports `clinguini()`, `command()`, `flag()`, `param()`, and their types
-from `types.ts`. Configuration shapes and CLI execution remain unimplemented.
+**Status:** configuration types are defined; `index.ts` prints `hello from clinguini`.
+Helpers and command execution remain pending.
 The examples below describe the intended API.
 
 ## Usage
@@ -115,9 +114,34 @@ agent-tests run --help
 
 ```sh
 bun install --frozen-lockfile
+bun run check
 bun run lint
 bun run format
 ```
 
 Prettier and ESLint follow the shared agent-tests configuration, without its
 Svelte-specific plugins. These tools are development dependencies only.
+
+## Publishing
+
+The package ships TypeScript source directly, with no compilation step.
+Use Bun or a TypeScript loader on Node.js: Node's built-in type stripping does
+not support TypeScript inside `node_modules`.
+`npm pack --dry-run` previews the package contents.
+
+First publish and configure GitHub Actions trust (npm 11.15+ and account 2FA required):
+
+```sh
+npm login
+npm publish --access public
+npm trust github clinguini --repo feuersteiner/clinguini --file publish.yml --allow-publish
+npm trust list clinguini
+```
+
+The package must exist on npm before trust can be configured. See
+[npm trust](https://docs.npmjs.com/cli/v11/commands/npm-trust/).
+
+After setup, bump `version` in `package.json` and push to `main`.
+`.github/workflows/publish.yml` checks and publishes directly using OIDC
+and provenance, then creates a `clinguini@<version>` GitHub release, like bref-ui.
+Manual dispatch is also available; npm rejects already-published versions.

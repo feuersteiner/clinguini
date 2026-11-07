@@ -4,7 +4,9 @@ A very tiny CLI builder. For me. Maybe for you.
 
 Native TypeScript. Node.js compatible. Zero runtime dependencies.
 
-**Status:** specification only. No implementation or published package yet.
+**Status:** public helper scaffold only; no published package yet.
+`index.ts` exports `clinguini()`, `command()`, `flag()`, `param()`, and their types
+from `types.ts`. Configuration shapes and CLI execution remain unimplemented.
 The examples below describe the intended API.
 
 ## Usage

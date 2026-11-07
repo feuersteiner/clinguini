@@ -1,6 +1,9 @@
-export interface Command {
+interface Metadata {
 	name: string;
 	description?: string;
+}
+
+export interface Command extends Metadata {
 	params?: Param[];
 	flags?: Flag[];
 	commands?: Command[];
@@ -19,16 +22,12 @@ interface Utils {
 	header?: string;
 }
 
-export interface Flag {
-	name: string;
-	description?: string;
+export interface Flag extends Metadata {
 	shortForm?: string;
 	type: 'string' | 'number' | 'boolean';
 	default?: unknown;
 }
 
-export interface Param {
-	name: string;
-	description?: string;
+export interface Param extends Metadata {
 	optional?: boolean;
 }

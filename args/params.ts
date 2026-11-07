@@ -2,6 +2,7 @@ import type { Param } from '../types.ts';
 
 /**
  * Assigns positional strings to their declared names.
+ * @internal Used only by the argument parser.
  * @param values Positional arguments after flag parsing.
  * @param definitions Ordered parameters; required parameters must precede optional ones.
  * @returns Values keyed by parameter name; omitted optional values are undefined.

@@ -140,12 +140,24 @@ agent-tests run --help
 bun install --frozen-lockfile
 bun run check
 bun run test
+bun run test:coverage
 bun run lint
 bun run format
 ```
 
 Prettier and ESLint follow the shared agent-tests configuration, without its
 Svelte-specific plugins. These tools are development dependencies only.
+
+Tests cover command routing, scoped flags, defaults, params, conversions, factory behavior
+and the package's runtime/type export boundaries. Schema fixtures in `tests/schemas.ts`
+model bref-ui's CLI at `7096f75` and agent-tests' documented commands at `5e5d90c`.
+The agent-tests executable is currently a Hello World stub, so its fixture checks the
+documented schema rather than an implemented CLI.
+
+Full CLI compatibility is pending: automatic help and command execution are unimplemented.
+The generic string-param schema also leaves bref-ui's nonempty, non-dash-prefixed
+component-ID validation to the application. Tests explicitly cover these limits.
+The agreed `--` separator also extends bref-ui's current bespoke parser.
 
 ## Publishing
 

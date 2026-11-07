@@ -3,6 +3,7 @@ import type { Flag } from '../types.ts';
 
 /**
  * Recognizes flag tokens while allowing a lone dash and negative numbers as values.
+ * @internal Used only by command traversal and flag reading.
  * @param token Raw argument text.
  * @returns Whether the token starts a named flag.
  */
@@ -36,6 +37,7 @@ const flagDefault = ({ name, type, default: fallback }: Flag) => {
 
 /**
  * Prepares one command's flag definitions before reading its arguments.
+ * @internal Used only when command traversal starts a scope.
  * @param definitions Local flags, aliases and defaults.
  * @returns A lookup by accepted name and initial values by configured name.
  * @throws {Error} For invalid aliases, duplicate names or invalid defaults.
@@ -57,6 +59,7 @@ export const prepareFlags = (definitions: Flag[] = []) => {
 /**
  * Reads one flag and its inline or following value.
  * Failed value conversions also log their reason through the shared parser.
+ * @internal Used only by command traversal.
  * @param args Raw command arguments.
  * @param index Position of the flag token.
  * @param lookup Flag definitions for the current command only.

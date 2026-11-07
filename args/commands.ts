@@ -30,6 +30,7 @@ const findChild = (name: string, parent: Command) => {
 
 /**
  * Walks the command tree, reading each flag once in its declaring scope.
+ * @internal Used only by the argument parser.
  * @param args CLI arguments after the executable name.
  * @param config Root command and its recursive child definitions.
  * @returns Root-to-target scopes containing local flag values and positional strings.

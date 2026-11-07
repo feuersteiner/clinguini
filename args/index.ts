@@ -7,6 +7,7 @@ import { parseParams } from './params.ts';
  * Subcommands win over params until -- or the first positional value stops descent.
  * Parent flags must appear before the next subcommand; flags are not inherited.
  * Failed value conversions also log their reason through the shared parser.
+ * @internal Imported by CLI composition; not exposed by the package entry point.
  * @param args CLI arguments, excluding runtime and script paths.
  * @param config Root command configuration, including recursive subcommands.
  * @returns The root-to-target path with local flags and the target's named params.

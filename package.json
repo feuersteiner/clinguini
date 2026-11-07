@@ -29,6 +29,7 @@
 	"scripts": {
 		"check": "tsc -p tsconfig.json --noEmit",
 		"test": "node --test",
+		"test:coverage": "node --test --experimental-test-coverage --test-coverage-include=\"args/**/*.ts\" --test-coverage-include=\"parsers.ts\" --test-coverage-include=\"index.ts\"",
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write ."
 	},

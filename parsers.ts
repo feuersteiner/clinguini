@@ -3,6 +3,7 @@ import type { Flag } from './types.ts';
 /**
  * Parses an argument as a string, finite number or boolean.
  * Strings are unchanged; numbers use Number conversion; booleans require "true" or "false".
+ * @internal Shared by argument parsing; not exposed by the package entry point.
  * @param value Raw argument text.
  * @param type Expected value type.
  * @returns The parsed value, or undefined after logging why parsing failed.

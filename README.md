@@ -4,7 +4,7 @@ A very tiny CLI builder. For me. Maybe for you.
 
 Native TypeScript. Node.js compatible. Zero runtime dependencies.
 
-**Status:** typed helper factories and string, number and boolean value parsers are implemented.
+**Status:** typed helper factories and a shared string, number and boolean value parser are implemented.
 CLI execution and built-in utilities remain unimplemented.
 The examples below describe the intended API.
 

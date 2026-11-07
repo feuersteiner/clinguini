@@ -5,9 +5,9 @@
 		"moduleResolution": "NodeNext",
 		"strict": true,
 		"verbatimModuleSyntax": true,
-		"rewriteRelativeImportExtensions": true,
-		"declaration": true,
-		"outDir": "dist"
+		"allowImportingTsExtensions": true,
+		"erasableSyntaxOnly": true,
+		"noEmit": true
 	},
 	"include": ["*.ts"]
 }

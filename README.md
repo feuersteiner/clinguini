@@ -122,7 +122,6 @@ agent-tests run --help
 bun install --frozen-lockfile
 bun run check
 bun run lint
-bun run build
 bun run format
 ```
 
@@ -131,8 +130,10 @@ Svelte-specific plugins. These tools are development dependencies only.
 
 ## Publishing
 
-The package ships compiled ESM and TypeScript declarations for Node.js 22+.
-`npm publish` builds it through `prepack`; `npm pack --dry-run` previews its contents.
+The package ships TypeScript source directly, with no compilation step.
+Use Bun or a TypeScript loader on Node.js: Node's built-in type stripping does
+not support TypeScript inside `node_modules`.
+`npm pack --dry-run` previews the package contents.
 
 First publish and configure GitHub Actions trust (npm 11.15+ and account 2FA required):
 
@@ -147,6 +148,6 @@ The package must exist on npm before trust can be configured. See
 [npm trust](https://docs.npmjs.com/cli/v11/commands/npm-trust/).
 
 After setup, bump `version` in `package.json` and push to `main`.
-`.github/workflows/publish.yml` checks, builds and publishes directly using OIDC
+`.github/workflows/publish.yml` checks and publishes directly using OIDC
 and provenance, then creates a `clinguini@<version>` GitHub release, like bref-ui.
 Manual dispatch is also available; npm rejects already-published versions.

@@ -3,16 +3,12 @@
 	"version": "0.1.0",
 	"description": "A very tiny CLI builder. Native TypeScript, Node.js compatible, zero runtime dependencies.",
 	"type": "module",
-	"main": "./dist/index.js",
-	"types": "./dist/index.d.ts",
-	"exports": {
-		".": {
-			"types": "./dist/index.d.ts",
-			"import": "./dist/index.js"
-		}
-	},
+	"exports": "./index.ts",
 	"files": [
-		"dist"
+		"index.ts",
+		"types.ts",
+		"parse-args.ts",
+		"parsers.ts"
 	],
 	"engines": {
 		"node": ">=22"
@@ -31,9 +27,7 @@
 	},
 	"packageManager": "bun@1.3.4",
 	"scripts": {
-		"build": "tsc -p tsconfig.json",
 		"check": "tsc -p tsconfig.json --noEmit",
-		"prepack": "npm run build",
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write ."
 	},

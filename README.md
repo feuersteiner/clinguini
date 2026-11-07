@@ -4,7 +4,7 @@ A very tiny CLI builder. For me. Maybe for you.
 
 Native TypeScript. Node.js compatible. Zero runtime dependencies.
 
-**Status:** typed helper factories and a shared string, number and boolean value parser are implemented.
+**Status:** typed helper factories, value conversion and argument parsing are implemented.
 CLI execution and built-in utilities remain unimplemented.
 The examples below describe the intended API.
 
@@ -81,13 +81,17 @@ export const add = command({
 
 Params are strings and required by default. Set `optional: true` to make a param optional.
 Each param accepts one value.
+Required params cannot follow optional params.
 
 Calling a command group without choosing a command displays that group's help.
 
-Flags are optional. Boolean flags are `false` when absent and `true` when supplied.
+Flags are optional. Boolean flags default to `false` when absent and are `true` when supplied.
 String and number flags are `undefined` when absent, unless `default` is set.
 `shortForm` provides a single-letter alias. String and number values accept
 `--base main` or `--base=main`. Required flags are outside the current scope.
+Repeated flags use the last value. `--` ends flag parsing. Boolean flags do not
+take values. Number values must be finite and nonempty. Invalid values and defaults
+are logged and rejected; unknown flags and missing or extra arguments are rejected.
 
 Handlers can be sync or async and need no return value. Completion means success;
 throwing an error makes clinguini report its message and set exit code `1`.

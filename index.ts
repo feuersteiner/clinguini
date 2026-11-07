@@ -9,8 +9,8 @@ export const clinguini: (
 	throw new Error('clinguini execution is not implemented yet.');
 };
 
-export const command = <const T extends Command>(config: T): T => config;
+export const command = (config: Command): Command => ({ ...config });
 
-export const flag = <const T extends Flag>(config: T): T => config;
+export const flag = (config: Flag): Flag => ({ ...config });
 
-export const param = <const T extends Param>(config: T): T => config;
+export const param = (config: Param): Param => ({ ...config });

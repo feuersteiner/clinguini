@@ -4,11 +4,8 @@ A very tiny CLI builder. For me. Maybe for you.
 
 Native TypeScript. Node.js compatible. Zero runtime dependencies.
 
-**Status:** early development. Typed factories and argument parsing are implemented.
-`index.ts` exports `clinguini()`, `command()`, `flag()`, `param()`, and their types
-from `types.ts`. CLI execution and built-in utilities remain unimplemented;
-calling `clinguini()` currently throws.
-The examples below describe the complete intended API.
+**Status:** type stubs only. `index.ts` prints `hello from clinguini`.
+Implementation is kept in separate PRs. The examples below describe the intended API.
 
 ## Usage
 
@@ -39,22 +36,22 @@ await clinguini(process.argv.slice(2), {
 `commands/run.ts`:
 
 ```typescript
-import { command, flag, param } from 'clinguini';
+import { command } from 'clinguini';
 import { runChecks } from '../checks.js';
 
 export const run = command({
 	name: 'run',
 	description: 'Run matching tests',
-	params: [param({ name: 'paths', type: 'string', optional: true, variadic: true })],
+	params: [{ name: 'paths', type: 'string', optional: true, variadic: true }],
 	flags: [
-		flag({
+		{
 			name: 'changed',
 			type: 'boolean',
 			shortForm: 'c',
 			description: 'Check uncommitted files'
-		}),
-		flag({ name: 'base', type: 'string', description: 'Compare against a Git reference' }),
-		flag({ name: 'concurrency', type: 'number', default: 4 })
+		},
+		{ name: 'base', type: 'string', description: 'Compare against a Git reference' },
+		{ name: 'concurrency', type: 'number', default: 4 }
 	],
 	utils: {
 		header: 'Running checks'
@@ -68,15 +65,15 @@ export const run = command({
 `commands/add.ts`:
 
 ```typescript
-import { command, param } from 'clinguini';
+import { command } from 'clinguini';
 import { addTest } from '../tests.js';
 
 export const add = command({
 	name: 'add',
 	description: 'Install a test',
 	params: [
-		param({ name: 'id', type: 'string' }),
-		param({ name: 'targetDir', type: 'string', optional: true })
+		{ name: 'id', type: 'string' },
+		{ name: 'targetDir', type: 'string', optional: true }
 	],
 	handler: async ({ params }) => {
 		await addTest(params.id, params.targetDir);
@@ -85,8 +82,6 @@ export const add = command({
 ```
 
 Params are required by default. Set `optional: true` to make a param optional.
-A variadic param must be last and returns an array; an omitted optional variadic
-returns `[]`. Required params cannot follow optional params.
 
 Calling a command group without choosing a command displays that group's help.
 
@@ -94,8 +89,6 @@ Flags are optional. Boolean flags are `false` when absent and `true` when suppli
 String and number flags are `undefined` when absent, unless `default` is set.
 `shortForm` provides a single-letter alias. String and number values accept
 `--base main` or `--base=main`. Required flags are outside the current scope.
-Repeated flags use the last value. `--` ends flag parsing. Boolean flags do not
-take values. Number values must be finite and nonempty.
 
 Handlers can be sync or async and need no return value. Completion means success;
 throwing an error makes clinguini report its message and set exit code `1`.

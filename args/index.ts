@@ -1,6 +1,5 @@
 import type { Command } from '../types.ts';
 import { resolveCommands } from './commands.ts';
-import { parseFlags } from './flags.ts';
 import { parseParams } from './params.ts';
 
 /**
@@ -16,8 +15,7 @@ import { parseParams } from './params.ts';
  */
 export const parseArgs = (args: readonly string[], config: Command) => {
 	const commands = resolveCommands(args, config);
-	return commands.map(({ command, args }, index) => {
-		const { flags, positional } = parseFlags(args, command.flags);
+	return commands.map(({ command, flags, positional }, index) => {
 		const params = parseParams(positional, index === commands.length - 1 ? command.params : []);
 		return { command, params, flags };
 	});

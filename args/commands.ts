@@ -1,50 +1,69 @@
 import type { Command } from '../types.ts';
-import { optionPattern } from './flags.ts';
+import { isFlag, prepareFlags, readFlag } from './flags.ts';
 
 /**
- * Splits arguments into command scopes, preferring declared children over params.
- * Flag values stay in their scope; -- or the first positional value stops descent.
- * @param args Arguments after the executable name.
+ * Starts a command scope with its own flag definitions, defaults and positional values.
+ * @param command Command being selected.
+ * @returns The scope used while reading that command's arguments.
+ * @throws {Error} For invalid flag definitions or defaults.
+ */
+const createScope = (command: Command) => {
+	const { lookup, values } = prepareFlags(command.flags);
+	return { command, lookup, flags: values, positional: [] as string[] };
+};
+
+/**
+ * Matches a child command before falling back to a positional parameter.
+ * @param name Bare argument that could select a child.
+ * @param parent Current command's definition.
+ * @returns The matching child, or undefined when positional parsing should start.
+ * @throws {Error} For duplicate matches or unknown names in groups without params.
+ */
+const findChild = (name: string, parent: Command) => {
+	const matches = parent.commands?.filter((command) => command.name === name) ?? [];
+	if (matches.length > 1) throw new Error(`Duplicate command: "${name}".`);
+	if (matches.length === 1) return matches[0];
+	if (parent.commands?.length && !parent.params?.length)
+		throw new Error(`Unknown command: "${name}".`);
+	return undefined;
+};
+
+/**
+ * Walks the command tree, reading each flag once in its declaring scope.
+ * @param args CLI arguments after the executable name.
  * @param config Root command and its recursive child definitions.
- * @returns The root-to-target path with each command's local argument tokens.
- * @throws {Error} For unknown subcommands or ambiguous duplicate command names.
+ * @returns Root-to-target scopes containing local flag values and positional strings.
+ * @throws {Error} For invalid commands, flag definitions or flag values.
  */
 export const resolveCommands = (args: readonly string[], config: Command) => {
+	let skipNext = false;
 	let positionalStarted = false;
-	let valueIndex = -1;
+	let optionsEnded = false;
 	return args.reduce(
-		(commands, token, index) => {
-			const current = commands[commands.length - 1];
-			if (positionalStarted || index === valueIndex) {
-				current.args.push(token);
-				return commands;
+		(scopes, token, index) => {
+			if (skipNext) {
+				skipNext = false;
+				return scopes;
 			}
-			if (token === '--') {
+			const current = scopes[scopes.length - 1];
+			if (token === '--' && !optionsEnded) {
 				positionalStarted = true;
-				current.args.push(token);
-				return commands;
+				optionsEnded = true;
+				return scopes;
 			}
-			if (optionPattern.test(token)) {
-				const name = token.split('=')[0];
-				const flag = current.command.flags?.find(
-					(flag) =>
-						name === `--${flag.name}` ||
-						(flag.shortForm !== undefined && name === `-${flag.shortForm}`)
-				);
-				if (flag && flag.type !== 'boolean' && !token.includes('=')) valueIndex = index + 1;
-				current.args.push(token);
-				return commands;
+			if (!optionsEnded && isFlag(token)) {
+				const { name, value, consumed } = readFlag(args, index, current.lookup);
+				current.flags[name] = value;
+				skipNext = consumed === 2;
+				return scopes;
 			}
 
-			const children = current.command.commands?.filter((command) => command.name === token) ?? [];
-			if (children.length > 1) throw new Error(`Duplicate command: "${token}".`);
-			if (children.length === 1) return [...commands, { command: children[0], args: [] }];
-			if (current.command.commands?.length && !current.command.params?.length)
-				throw new Error(`Unknown command: "${token}".`);
+			const child = positionalStarted ? undefined : findChild(token, current.command);
+			if (child) return [...scopes, createScope(child)];
 			positionalStarted = true;
-			current.args.push(token);
-			return commands;
+			current.positional.push(token);
+			return scopes;
 		},
-		[{ command: config, args: [] as string[] }]
+		[createScope(config)]
 	);
 };

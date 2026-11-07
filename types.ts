@@ -1,16 +1,16 @@
-// Configuration shapes will be defined alongside their implementations.
-export interface ClinguiniShape {
+// Configuration types will be defined alongside their implementations.
+export interface Clinguini {
 	[key: string]: unknown;
 }
 
-export interface CommandShape {
+export interface Command {
 	[key: string]: unknown;
 }
 
-export interface FlagShape {
+export interface Flag {
 	[key: string]: unknown;
 }
 
-export interface ParamShape {
+export interface Param {
 	[key: string]: unknown;
 }

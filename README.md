@@ -83,6 +83,26 @@ Params are strings and required by default. Set `optional: true` to make a param
 Each param accepts one value.
 Required params cannot follow optional params.
 
+`commands` declares subcommands recursively. A matching child name takes precedence
+over a positional param until the first positional value or `--` stops command selection.
+Flag values are consumed separately, even when they match a subcommand name.
+Flags belong to their declaring command and must appear before the next subcommand;
+they are not inherited by children.
+
+For a `config` command with an optional `file` param, a string `--profile` flag and
+a `set` subcommand taking `key` and `value`:
+
+```sh
+tool config set theme dark  # config → set; key=theme, value=dark
+tool config settings.json   # config; file=settings.json
+tool config -- set          # config; file=set
+tool config --profile set   # config; profile=set (flag value)
+```
+
+The internal `args/index.ts` parser returns the root-to-target command path. Each entry
+contains its command definition, local flags and params. Only the last entry binds
+positional params; ancestor handlers are not invoked by parsing.
+
 Calling a command group without choosing a command displays that group's help.
 
 Flags are optional. Boolean flags default to `false` when absent and are `true` when supplied.
@@ -119,6 +139,7 @@ agent-tests run --help
 ```sh
 bun install --frozen-lockfile
 bun run check
+bun run test
 bun run lint
 bun run format
 ```

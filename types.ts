@@ -12,7 +12,7 @@ export interface Command extends Metadata {
 	params?: Param[];
 	/** Named flags accepted by this command. */
 	flags?: Flag[];
-	/** Child commands selected by name. */
+	/** Child commands selected by name before positional params; -- forces params. */
 	commands?: Command[];
 	/** Built-in utility settings for this command. */
 	utils?: Utils;

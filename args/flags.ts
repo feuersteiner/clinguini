@@ -2,7 +2,7 @@ import { parse } from '../parsers.ts';
 import type { Flag } from '../types.ts';
 
 /** A lone dash and negative numbers are values; other leading dashes start flags. */
-const optionPattern = /^-(?!$|\d|\.\d)/;
+export const optionPattern = /^-(?!$|\d|\.\d)/;
 
 /**
  * Parses named flags and collects positional values, honoring the -- separator.

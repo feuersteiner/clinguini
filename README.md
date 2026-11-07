@@ -42,9 +42,7 @@ import { runChecks } from '../checks.js';
 export const run = command({
 	name: 'run',
 	description: 'Run matching tests',
-	params: [
-		{ name: 'paths', type: 'string', optional: true, variadic: true }
-	],
+	params: [{ name: 'paths', type: 'string', optional: true, variadic: true }],
 	flags: [
 		{
 			name: 'changed',
@@ -110,3 +108,14 @@ agent-tests run --base=main
 agent-tests add no-informal-english apps/web
 agent-tests run --help
 ```
+
+## Development
+
+```sh
+bun install --frozen-lockfile
+bun run lint
+bun run format
+```
+
+Prettier and ESLint follow the shared agent-tests configuration, without its
+Svelte-specific plugins. These tools are development dependencies only.

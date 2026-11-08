@@ -1,16 +1,7 @@
 import type { Command, Flag, Param } from './types.ts';
 
 export type { Command, Flag, Handler, Param } from './types.ts';
-
-/**
- * Placeholder CLI entry point. Execution is not implemented yet.
- * @param args CLI arguments, excluding the runtime and script paths.
- * @param config Root command configuration.
- * @returns A promise that always rejects with an unimplemented-execution error.
- */
-export const clinguini: (args: readonly string[], config: Command) => Promise<void> = async () => {
-	throw new Error('clinguini execution is not implemented yet.');
-};
+export { clinguini } from './cli/index.ts';
 
 /**
  * Defines a command without executing its handler or validating its configuration.

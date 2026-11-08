@@ -41,7 +41,7 @@ test('bref-ui no-argument request preserves the group for later help handling', 
 });
 
 test('bref-ui schema utility settings do not execute help during argument parsing', () => {
-	// These forms work in bref-ui's executable. clinguini's utility/execution stage is still a stub.
+	// Utilities belong to clinguini(), while the internal parser only reads declared flags.
 	[['--help'], ['-h'], ['init', '--help'], ['add', '-h']].map((args) => {
 		assert.throws(() => parseArgs(args, brefUi), /Unknown flag/);
 	});

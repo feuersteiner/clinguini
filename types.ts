@@ -33,7 +33,7 @@ export type Handler = (args: {
 	flags: Record<string, string | number | boolean | undefined>;
 }) => void | Promise<void>;
 
-/** Settings for planned built-in utilities; command execution is not implemented yet. */
+/** Built-in utilities inherited by children unless overridden. */
 interface Utils {
 	/** Enable generated --help / -h handling. */
 	help?: boolean;

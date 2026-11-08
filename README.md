@@ -62,7 +62,7 @@ for examples and argument rules.
 
 ## How tiny?
 
-**1.90 KiB minified + gzip** (1,950 bytes) for the `0.1.1` public runtime,
+**1.90 KiB minified + gzip** (1,950 bytes) for the `1.0.0` public runtime,
 bundled with Bun 1.3.4. Measured, since apparently “very” is not a unit.
 
 Reproduce from a checkout with Bun installed:

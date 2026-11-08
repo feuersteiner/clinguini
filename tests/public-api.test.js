@@ -87,13 +87,12 @@ test('factories shallow-copy definitions and preserve nested definitions and han
 	assert.notEqual(api.param(param), param);
 });
 
-test('clinguini execution remains explicitly unimplemented', async () => {
-	await assert.rejects(api.clinguini([], { name: 'root' }), /execution is not implemented/);
-});
-
-test('package includes required source modules and excludes test fixtures', () => {
+test('package exports compiled JavaScript and declarations without runtime dependencies', () => {
 	const manifest = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
-	assert.deepEqual(manifest.files, ['index.ts', 'types.ts', 'parsers.ts', 'args']);
-	assert.equal(manifest.exports, './index.ts');
+	assert.deepEqual(manifest.files, ['dist']);
+	assert.deepEqual(manifest.exports, {
+		'.': { types: './dist/index.d.ts', default: './dist/index.js' }
+	});
+	assert.equal(manifest.types, './dist/index.d.ts');
 	assert.equal(Object.keys(manifest.dependencies ?? {}).length, 0);
 });

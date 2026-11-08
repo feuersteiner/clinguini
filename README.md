@@ -4,9 +4,8 @@ A very tiny CLI builder. For me. Maybe for you.
 
 Native TypeScript. Node.js compatible. Zero runtime dependencies.
 
-**Status:** typed helper factories and a shared string, number and boolean value parser are implemented.
-CLI execution and built-in utilities remain unimplemented.
-The examples below describe the intended API.
+Typed helper factories, argument parsing, command execution and built-in utilities are implemented.
+The npm package ships JavaScript and TypeScript declarations for plain Node.js consumers.
 
 ## Usage
 
@@ -81,13 +80,38 @@ export const add = command({
 
 Params are strings and required by default. Set `optional: true` to make a param optional.
 Each param accepts one value.
+Required params cannot follow optional params.
+
+`commands` declares subcommands recursively. A matching child name takes precedence
+over a positional param until the first positional value or `--` stops command selection.
+Flag values are consumed separately, even when they match a subcommand name.
+Flags belong to their declaring command and must appear before the next subcommand;
+they are not inherited by children.
+
+For a `config` command with an optional `file` param, a string `--profile` flag and
+a `set` subcommand taking `key` and `value`:
+
+```sh
+tool config set theme dark  # config → set; key=theme, value=dark
+tool config settings.json   # config; file=settings.json
+tool config -- set          # config; file=set
+tool config --profile set   # config; profile=set (flag value)
+```
+
+The internal `args/index.ts` parser returns the root-to-target command path. Each entry
+contains its command definition, local flags and params. Only the last entry binds
+positional params; ancestor handlers are not invoked by parsing.
 
 Calling a command group without choosing a command displays that group's help.
+Help recursively lists the selected command and its descendants.
 
-Flags are optional. Boolean flags are `false` when absent and `true` when supplied.
+Flags are optional. Boolean flags default to `false` when absent and are `true` when supplied.
 String and number flags are `undefined` when absent, unless `default` is set.
 `shortForm` provides a single-letter alias. String and number values accept
 `--base main` or `--base=main`. Required flags are outside the current scope.
+Repeated flags use the last value. `--` ends flag parsing. Boolean flags do not
+take values. Number values must be finite and nonempty. Invalid values and defaults
+are logged and rejected; unknown flags and missing or extra arguments are rejected.
 
 Handlers can be sync or async and need no return value. Completion means success;
 throwing an error makes clinguini report its message and set exit code `1`.
@@ -101,6 +125,12 @@ Flag defaults use `unknown` and are parsed according to the flag's `type`.
 can override them. `help` enables generated `--help` / `-h`; `verbose` enables the
 `--verbose` / `-v` flag. `header` optionally prints once at startup, using the selected
 command's setting. Clinguini's logging stays internal.
+Set `help` to a sync or async function to retain an application's existing help output.
+Root `utils.argumentError` can override the argument-error `message` and `exitCode`;
+handler failures keep their own messages and exit code `1`.
+Utility flags are consumed internally and excluded from handler flags. Verbose mode prints
+the selected command to stderr and includes stack traces for handler failures.
+Enabled utility names and aliases must not conflict with application flags.
 
 ```sh
 agent-tests
@@ -114,7 +144,10 @@ agent-tests run --help
 
 ```sh
 bun install --frozen-lockfile
+bun run build
 bun run check
+bun run test
+bun run test:coverage
 bun run lint
 bun run format
 ```
@@ -122,12 +155,39 @@ bun run format
 Prettier and ESLint follow the shared agent-tests configuration, without its
 Svelte-specific plugins. These tools are development dependencies only.
 
+Tests cover command routing, scoped flags, defaults, params, conversions, factory behavior
+and the package's runtime/type export boundaries. Schema fixtures in `tests/schemas.ts`
+model bref-ui's CLI at `7096f75` and agent-tests' documented commands at `5e5d90c`.
+The agent-tests executable is currently a Hello World stub, so its fixture checks the
+documented schema rather than an implemented CLI.
+
+Package tests build and install a tarball offline, exercise the public API with plain Node,
+and typecheck a separate TypeScript consumer. To also compile and exercise Bref's real
+handlers from a local checkout, run:
+
+```sh
+BREF_UI_DIR=/path/to/bref-ui bun run test
+```
+
+The Bref integration copies its checkout into a temporary workspace, runs its original
+CLI suite unchanged, replaces the executable entry point with clinguini, then reruns the
+same suite through Bref's normal packaging and npm/npx fixtures. The suite and its fixture
+are checked byte-for-byte against the originals. Their npm install step may use the registry.
+
+Additional checks compare both executables' stdout, stderr, exit status and project files,
+including installation, cancellation and overwrite decisions. An argument matrix checks
+command/help placement, extra arguments, separators and invalid IDs. The replacement's
+old parser is disabled to ensure clinguini performs argument parsing.
+
+The replacement retains Bref's help, error text, exit codes and strict argument rules.
+Application-specific validation stays in the adapter; clinguini's generic defaults are unchanged.
+
 ## Publishing
 
-The package ships TypeScript source directly, with no compilation step.
-Use Bun or a TypeScript loader on Node.js: Node's built-in type stripping does
-not support TypeScript inside `node_modules`.
-`npm pack --dry-run` previews the package contents.
+`npm pack` and `npm publish` compile TypeScript into `dist/` through `prepack`.
+Only compiled JavaScript, declarations and package documentation are shipped.
+Consumers need Node.js 22+ and no TypeScript loader or runtime dependencies.
+`npm pack --dry-run` builds and previews the package contents.
 
 First publish and configure GitHub Actions trust (npm 11.15+ and account 2FA required):
 

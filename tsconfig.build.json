@@ -1,0 +1,11 @@
+{
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"noEmit": false,
+		"rewriteRelativeImportExtensions": true,
+		"declaration": true,
+		"rootDir": ".",
+		"outDir": "dist"
+	},
+	"include": ["index.ts", "types.ts", "parsers.ts", "help.ts", "args/**/*.ts"]
+}

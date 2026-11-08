@@ -1,15 +1,63 @@
-import type { Command, Flag, Param } from './types.ts';
+import { resolveCommands } from './args/commands.ts';
+import { parseParams } from './args/params.ts';
+import { printHelp } from './help.ts';
+import type { Command, Flag, Handler, Param } from './types.ts';
 
 export type { Command, Flag, Handler, Param } from './types.ts';
 
 /**
- * Placeholder CLI entry point. Execution is not implemented yet.
- * @param args CLI arguments, excluding the runtime and script paths.
- * @param config Root command configuration.
- * @returns A promise that always rejects with an unimplemented-execution error.
+ * Parse arguments, show help or await the selected handler.
+ * Invalid arguments default to exit code 2; handler failures set exit code 1.
+ * Errors are reported without terminating the process or rejecting the promise.
  */
-export const clinguini: (args: readonly string[], config: Command) => Promise<void> = async () => {
-	throw new Error('clinguini execution is not implemented yet.');
+export const clinguini = async (args: readonly string[], config: Command): Promise<void> => {
+	let handler: Handler;
+	let values: Parameters<Handler>[0];
+	let verbose: boolean;
+	try {
+		const scopes = resolveCommands(args, config);
+		const helpIndex = scopes.findIndex((scope) => scope.help);
+		const selected = helpIndex === -1 ? scopes.length - 1 : helpIndex;
+		const target = scopes[selected];
+		const command = target.command;
+		verbose = scopes.some((scope) => scope.verbose);
+		const help =
+			helpIndex !== -1 ||
+			(!command.handler && command.commands?.length && target.positional.length === 0);
+		const params = help ? {} : parseParams(target.positional, command.params);
+		if (target.utils.header) console.log(target.utils.header);
+		if (help || !command.handler) {
+			if (typeof target.utils.help !== 'function') {
+				printHelp(
+					command,
+					scopes.slice(0, selected).map((scope) => scope.command.name),
+					target.utils
+				);
+				return;
+			}
+			handler = target.utils.help;
+		} else {
+			handler = command.handler;
+			if (verbose) console.error(`Running ${scopes.map((scope) => scope.command.name).join(' ')}.`);
+		}
+		values = { params, flags: target.flags };
+	} catch (error) {
+		const settings = config.utils?.argumentError;
+		console.error(
+			`Error: ${settings?.message ?? (error instanceof Error ? error.message : String(error))}`
+		);
+		process.exitCode = settings?.exitCode ?? 2;
+		return;
+	}
+	try {
+		await handler(values);
+	} catch (error) {
+		const message = error instanceof Error ? error.message : String(error);
+		console.error(
+			verbose && error instanceof Error ? (error.stack ?? `Error: ${message}`) : `Error: ${message}`
+		);
+		process.exitCode = 1;
+	}
 };
 
 /**

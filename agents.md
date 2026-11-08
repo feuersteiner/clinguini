@@ -1,5 +1,6 @@
-clinguini - a very tiny cli builder... for me
-
-native TS
-Node compatible
-veery tiny
+- Keep clinguini tiny: TypeScript, Node compatible, zero runtime dependencies.
+- Prefer readable interfaces and a named Handler over elaborate generic machinery.
+- Use short names: params, commands, flags, args; avoid redundant Shape suffixes.
+- Split complicated code into clear steps; avoid forwarding files and duplicate traversals.
+- Prefer map, flatMap, and filter for transformations; keep recursive help straightforward.
+- Add clear JSDoc to functions, types, and properties; keep documentation accurate.

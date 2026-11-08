@@ -14,7 +14,7 @@ const help = async (): Promise<void> => {
  await execute({ name: 'help' }, process.cwd());
 };
 
-await clinguini(args, {
+await clinguini({
  name: 'bref-ui',
  utils: { help, argumentError: { message, exitCode: 1 } },
  commands: [

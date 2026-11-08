@@ -1,7 +1,19 @@
 {
 	"name": "clinguini",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "A very tiny CLI builder. Native TypeScript, Node.js compatible, zero runtime dependencies.",
+	"keywords": [
+		"cli",
+		"cli-builder",
+		"command-line",
+		"argument-parser",
+		"typescript",
+		"javascript",
+		"nodejs",
+		"subcommands",
+		"flags",
+		"zero-dependencies"
+	],
 	"license": "MIT",
 	"type": "module",
 	"types": "./dist/index.d.ts",
@@ -21,7 +33,7 @@
 		"type": "git",
 		"url": "git+https://github.com/feuersteiner/clinguini.git"
 	},
-	"homepage": "https://github.com/feuersteiner/clinguini#readme",
+	"homepage": "https://discord.gg/D2qy7DNEFz",
 	"bugs": {
 		"url": "https://github.com/feuersteiner/clinguini/issues"
 	},

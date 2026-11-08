@@ -4,9 +4,8 @@ A very tiny CLI builder. For me. Maybe for you.
 
 Native TypeScript. Node.js compatible. Zero runtime dependencies.
 
-**Status:** typed helper factories, value conversion and argument parsing are implemented.
-CLI execution and built-in utilities remain unimplemented.
-The examples below describe the intended API.
+Typed helper factories, argument parsing, command execution and built-in utilities are implemented.
+The npm package ships JavaScript and TypeScript declarations for plain Node.js consumers.
 
 ## Usage
 
@@ -125,6 +124,9 @@ Flag defaults use `unknown` and are parsed according to the flag's `type`.
 can override them. `help` enables generated `--help` / `-h`; `verbose` enables the
 `--verbose` / `-v` flag. `header` optionally prints once at startup, using the selected
 command's setting. Clinguini's logging stays internal.
+Utility flags are consumed internally and excluded from handler flags. Verbose mode prints
+the selected command to stderr and includes stack traces for handler failures.
+Enabled utility names and aliases must not conflict with application flags.
 
 ```sh
 agent-tests
@@ -138,6 +140,7 @@ agent-tests run --help
 
 ```sh
 bun install --frozen-lockfile
+bun run build
 bun run check
 bun run test
 bun run test:coverage
@@ -154,17 +157,26 @@ model bref-ui's CLI at `7096f75` and agent-tests' documented commands at `5e5d90
 The agent-tests executable is currently a Hello World stub, so its fixture checks the
 documented schema rather than an implemented CLI.
 
-Full CLI compatibility is pending: automatic help and command execution are unimplemented.
-The generic string-param schema also leaves bref-ui's nonempty, non-dash-prefixed
-component-ID validation to the application. Tests explicitly cover these limits.
-The agreed `--` separator also extends bref-ui's current bespoke parser.
+Package tests build and install a tarball offline, exercise the public API with plain Node,
+and typecheck a separate TypeScript consumer. To also compile and exercise Bref's real
+handlers from a local checkout, run:
+
+```sh
+BREF_UI_DIR=/path/to/bref-ui bun run test
+```
+
+The Bref integration uses temporary consumer projects and covers help, initialization,
+component installation, repeat runs, cancellation, overwrite approval and invalid input.
+Bref-specific component-ID validation stays in the application adapter. The `--` separator
+extends Bref's current bespoke parser. Clinguini uses exit code `2` for argument errors;
+Bref's current executable uses `1` for all errors.
 
 ## Publishing
 
-The package ships TypeScript source directly, with no compilation step.
-Use Bun or a TypeScript loader on Node.js: Node's built-in type stripping does
-not support TypeScript inside `node_modules`.
-`npm pack --dry-run` previews the package contents.
+`npm pack` and `npm publish` compile TypeScript into `dist/` through `prepack`.
+Only compiled JavaScript, declarations and package documentation are shipped.
+Consumers need Node.js 22+ and no TypeScript loader or runtime dependencies.
+`npm pack --dry-run` builds and previews the package contents.
 
 First publish and configure GitHub Actions trust (npm 11.15+ and account 2FA required):
 

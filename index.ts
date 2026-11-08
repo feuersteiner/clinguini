@@ -7,11 +7,11 @@ export type { Command, Flag, Handler, Param } from './types.ts';
 
 /**
  * Parse arguments, show help or await the selected handler.
- * Invalid arguments set exit code 2; handler failures set exit code 1.
+ * Invalid arguments default to exit code 2; handler failures set exit code 1.
  * Errors are reported without terminating the process or rejecting the promise.
  */
 export const clinguini = async (args: readonly string[], config: Command): Promise<void> => {
-	let command: Command;
+	let handler: Handler;
 	let values: Parameters<Handler>[0];
 	let verbose: boolean;
 	try {
@@ -19,7 +19,7 @@ export const clinguini = async (args: readonly string[], config: Command): Promi
 		const helpIndex = scopes.findIndex((scope) => scope.help);
 		const selected = helpIndex === -1 ? scopes.length - 1 : helpIndex;
 		const target = scopes[selected];
-		command = target.command;
+		const command = target.command;
 		verbose = scopes.some((scope) => scope.verbose);
 		const help =
 			helpIndex !== -1 ||
@@ -27,22 +27,30 @@ export const clinguini = async (args: readonly string[], config: Command): Promi
 		const params = help ? {} : parseParams(target.positional, command.params);
 		if (target.utils.header) console.log(target.utils.header);
 		if (help || !command.handler) {
-			printHelp(
-				command,
-				scopes.slice(0, selected).map((scope) => scope.command.name),
-				target.utils
-			);
-			return;
+			if (typeof target.utils.help !== 'function') {
+				printHelp(
+					command,
+					scopes.slice(0, selected).map((scope) => scope.command.name),
+					target.utils
+				);
+				return;
+			}
+			handler = target.utils.help;
+		} else {
+			handler = command.handler;
+			if (verbose) console.error(`Running ${scopes.map((scope) => scope.command.name).join(' ')}.`);
 		}
 		values = { params, flags: target.flags };
-		if (verbose) console.error(`Running ${scopes.map((scope) => scope.command.name).join(' ')}.`);
 	} catch (error) {
-		console.error(`Error: ${error instanceof Error ? error.message : String(error)}`);
-		process.exitCode = 2;
+		const settings = config.utils?.argumentError;
+		console.error(
+			`Error: ${settings?.message ?? (error instanceof Error ? error.message : String(error))}`
+		);
+		process.exitCode = settings?.exitCode ?? 2;
 		return;
 	}
 	try {
-		await command.handler?.(values);
+		await handler(values);
 	} catch (error) {
 		const message = error instanceof Error ? error.message : String(error);
 		console.error(

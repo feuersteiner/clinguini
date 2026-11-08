@@ -35,12 +35,14 @@ export type Handler = (args: {
 
 /** Built-in utilities inherited by children unless overridden. */
 interface Utils {
-	/** Enable generated --help / -h handling. */
-	help?: boolean;
+	/** Enable --help / -h; optionally supply the application's help handler. */
+	help?: boolean | (() => void | Promise<void>);
 	/** Enable the --verbose / -v flag. */
 	verbose?: boolean;
 	/** Text to print once at startup; child settings override root settings. */
 	header?: string;
+	/** Root-level overrides for argument errors; handler failures retain their own messages. */
+	argumentError?: { message?: string; exitCode?: number };
 }
 
 /** Configuration for a named string, number or boolean flag. */

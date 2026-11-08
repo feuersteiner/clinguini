@@ -125,6 +125,9 @@ Flag defaults use `unknown` and are parsed according to the flag's `type`.
 can override them. `help` enables generated `--help` / `-h`; `verbose` enables the
 `--verbose` / `-v` flag. `header` optionally prints once at startup, using the selected
 command's setting. Clinguini's logging stays internal.
+Set `help` to a sync or async function to retain an application's existing help output.
+Root `utils.argumentError` can override the argument-error `message` and `exitCode`;
+handler failures keep their own messages and exit code `1`.
 Utility flags are consumed internally and excluded from handler flags. Verbose mode prints
 the selected command to stderr and includes stack traces for handler failures.
 Enabled utility names and aliases must not conflict with application flags.
@@ -166,11 +169,18 @@ handlers from a local checkout, run:
 BREF_UI_DIR=/path/to/bref-ui bun run test
 ```
 
-The Bref integration uses temporary consumer projects and covers help, initialization,
-component installation, repeat runs, cancellation, overwrite approval and invalid input.
-Bref-specific component-ID validation stays in the application adapter. The `--` separator
-extends Bref's current bespoke parser. Clinguini uses exit code `2` for argument errors;
-Bref's current executable uses `1` for all errors.
+The Bref integration copies its checkout into a temporary workspace, runs its original
+CLI suite unchanged, replaces the executable entry point with clinguini, then reruns the
+same suite through Bref's normal packaging and npm/npx fixtures. The suite and its fixture
+are checked byte-for-byte against the originals. Their npm install step may use the registry.
+
+Additional checks compare both executables' stdout, stderr, exit status and project files,
+including installation, cancellation and overwrite decisions. An argument matrix checks
+command/help placement, extra arguments, separators and invalid IDs. The replacement's
+old parser is disabled to ensure clinguini performs argument parsing.
+
+The replacement retains Bref's help, error text, exit codes and strict argument rules.
+Application-specific validation stays in the adapter; clinguini's generic defaults are unchanged.
 
 ## Publishing
 

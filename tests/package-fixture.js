@@ -7,8 +7,8 @@ import { spawnSync } from 'node:child_process';
 
 export const root = fileURLToPath(new URL('..', import.meta.url));
 
-export const execute = (command, args, cwd, input = '', status = 0) => {
-	const result = spawnSync(command, args, { cwd, input, encoding: 'utf8', timeout: 30_000 });
+export const execute = (command, args, cwd, input = '', status = 0, timeout = 30_000) => {
+	const result = spawnSync(command, args, { cwd, input, encoding: 'utf8', timeout });
 	assert.ifError(result.error);
 	assert.equal(
 		result.status,

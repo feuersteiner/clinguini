@@ -41,10 +41,11 @@ test('bref-ui no-argument request preserves the group for later help handling', 
 });
 
 test('bref-ui schema utility settings do not execute help during argument parsing', () => {
-	// Utilities belong to clinguini(), while the internal parser only reads declared flags.
-	[['--help'], ['-h'], ['init', '--help'], ['add', '-h']].map((args) => {
-		assert.throws(() => parseArgs(args, brefUi), /Unknown flag/);
+	// Traversal recognizes utilities; only clinguini() displays help and skips required params.
+	[['--help'], ['-h'], ['init', '--help'], ['add', 'button', '-h']].map((args) => {
+		assert.deepEqual(parseArgs(args, brefUi).at(-1).flags, {});
 	});
+	assert.throws(() => parseArgs(['add', '-h'], brefUi), /Missing required param/);
 });
 
 test('generic string params leave bref-ui component ID validation to the application', () => {

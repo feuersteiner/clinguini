@@ -1,15 +1,30 @@
-import type { Command } from '../types.ts';
+import type { Command, Flag } from '../types.ts';
 import { isFlag, prepareFlags, readFlag } from './flags.ts';
 
 /**
  * Starts a command scope with its own flag definitions, defaults and positional values.
  * @param command Command being selected.
+ * @param inherited Utility settings inherited from the parent scope.
  * @returns The scope used while reading that command's arguments.
  * @throws {Error} For invalid flag definitions or defaults.
  */
-const createScope = (command: Command) => {
-	const { lookup, values } = prepareFlags(command.flags);
-	return { command, lookup, flags: values, positional: [] as string[] };
+const createScope = (command: Command, inherited: Command['utils'] = {}) => {
+	const utils = { ...inherited, ...command.utils };
+	const flags: Flag[] = [...(command.flags ?? [])];
+	if (utils.help) flags.push({ name: 'help', shortForm: 'h', type: 'boolean' });
+	if (utils.verbose) flags.push({ name: 'verbose', shortForm: 'v', type: 'boolean' });
+	const { lookup, values } = prepareFlags(flags);
+	if (utils.help) delete values.help;
+	if (utils.verbose) delete values.verbose;
+	return {
+		command,
+		utils,
+		lookup,
+		flags: values,
+		help: false,
+		verbose: false,
+		positional: [] as string[]
+	};
 };
 
 /**
@@ -33,7 +48,7 @@ const findChild = (name: string, parent: Command) => {
  * @internal Used only by the argument parser.
  * @param args CLI arguments after the executable name.
  * @param config Root command and its recursive child definitions.
- * @returns Root-to-target scopes containing local flag values and positional strings.
+ * @returns Root-to-target scopes with local flags, positional strings and separate utilities.
  * @throws {Error} For invalid commands, flag definitions or flag values.
  */
 export const resolveCommands = (args: readonly string[], config: Command) => {
@@ -54,13 +69,15 @@ export const resolveCommands = (args: readonly string[], config: Command) => {
 			}
 			if (!optionsEnded && isFlag(token)) {
 				const { name, value, consumed } = readFlag(args, index, current.lookup);
-				current.flags[name] = value;
+				if (name === 'help' && current.utils.help) current.help = value === true;
+				else if (name === 'verbose' && current.utils.verbose) current.verbose = value === true;
+				else current.flags[name] = value;
 				skipNext = consumed === 2;
 				return scopes;
 			}
 
 			const child = positionalStarted ? undefined : findChild(token, current.command);
-			if (child) return [...scopes, createScope(child)];
+			if (child) return [...scopes, createScope(child, current.utils)];
 			positionalStarted = true;
 			current.positional.push(token);
 			return scopes;

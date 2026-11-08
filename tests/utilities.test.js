@@ -46,7 +46,8 @@ test('nested help describes the full command path, params, flags and children', 
 	for (const text of [
 		'Usage: tool config <command> [file] [options]',
 		'Manage config',
-		'set  Set a value',
+		'Usage: tool config set [options]',
+		'Set a value',
 		'-p, --profile <string>  Profile name'
 	])
 		assert.ok(result.stdout.includes(text));
@@ -137,4 +138,20 @@ test('the separator and inline string values preserve literal help tokens', asyn
 	const result = await capture(() => clinguini(['--text=--help', '--', '--help'], config));
 	assert.equal(result.exitCode, 0);
 	assert.deepEqual(values, { params: { id: '--help' }, flags: { text: '--help' } });
+});
+
+test('root help recursively includes nested commands and siblings with one header', async () => {
+	const config = {
+		name: 'tool',
+		utils: { help: true, header: 'Header' },
+		commands: [
+			{ name: 'config', commands: [{ name: 'set', params: [{ name: 'key' }] }] },
+			{ name: 'list' }
+		]
+	};
+	const result = await capture(() => clinguini(['--help'], config));
+	assert.equal(result.exitCode, 0);
+	assert.match(result.stdout, /Usage: tool config set <key> \[options\]/);
+	assert.match(result.stdout, /Usage: tool list \[options\]/);
+	assert.equal(result.stdout.split('\n').filter((line) => line === 'Header').length, 1);
 });

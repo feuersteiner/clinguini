@@ -10,5 +10,5 @@
 		"erasableSyntaxOnly": true,
 		"noEmit": true
 	},
-	"include": ["*.ts", "args/**/*.ts", "cli/**/*.ts", "tests/**/*.ts"]
+	"include": ["*.ts", "args/**/*.ts", "tests/**/*.ts"]
 }

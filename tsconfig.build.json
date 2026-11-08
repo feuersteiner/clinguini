@@ -7,5 +7,5 @@
 		"rootDir": ".",
 		"outDir": "dist"
 	},
-	"include": ["index.ts", "types.ts", "parsers.ts", "args/**/*.ts", "cli/**/*.ts"]
+	"include": ["index.ts", "types.ts", "parsers.ts", "help.ts", "args/**/*.ts"]
 }

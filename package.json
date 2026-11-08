@@ -34,7 +34,7 @@
 		"prepack": "npm run build",
 		"check": "tsc -p tsconfig.json --noEmit",
 		"test": "npm run build && node --test",
-		"test:coverage": "npm run build && node --test --experimental-test-coverage --test-coverage-include=\"args/**/*.ts\" --test-coverage-include=\"cli/**/*.ts\" --test-coverage-include=\"parsers.ts\" --test-coverage-include=\"index.ts\"",
+		"test:coverage": "npm run build && node --test --experimental-test-coverage --test-coverage-include=\"args/**/*.ts\" --test-coverage-include=\"help.ts\" --test-coverage-include=\"parsers.ts\" --test-coverage-include=\"index.ts\"",
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write ."
 	},

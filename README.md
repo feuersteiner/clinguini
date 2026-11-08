@@ -103,6 +103,7 @@ contains its command definition, local flags and params. Only the last entry bin
 positional params; ancestor handlers are not invoked by parsing.
 
 Calling a command group without choosing a command displays that group's help.
+Help recursively lists the selected command and its descendants.
 
 Flags are optional. Boolean flags default to `false` when absent and are `true` when supplied.
 String and number flags are `undefined` when absent, unless `default` is set.

@@ -9,8 +9,13 @@ export type { Command, Flag, Handler, Param } from './types.ts';
  * Parse arguments, show help or await the selected handler.
  * Invalid arguments default to exit code 2; handler failures set exit code 1.
  * Errors are reported without terminating the process or rejecting the promise.
+ * @param config Command metadata, arguments, children and handler.
+ * @param args Arguments to parse; defaults to process.argv.slice(2) at call time.
  */
-export const clinguini = async (args: readonly string[], config: Command): Promise<void> => {
+export const clinguini = async (
+	config: Command,
+	args: readonly string[] = process.argv.slice(2)
+): Promise<void> => {
 	let handler: Handler;
 	let values: Parameters<Handler>[0];
 	let verbose: boolean;

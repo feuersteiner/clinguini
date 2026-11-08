@@ -1,6 +1,6 @@
 {
 	"name": "clinguini",
-	"version": "0.1.1",
+	"version": "1.0.0",
 	"description": "A very tiny CLI builder. Native TypeScript, Node.js compatible, zero runtime dependencies.",
 	"license": "MIT",
 	"type": "module",

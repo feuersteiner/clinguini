@@ -17,7 +17,7 @@ test('installed npm package runs on plain Node and supplies usable declarations'
 		join(directory, 'cli.js'),
 		`
 import { clinguini, command } from 'clinguini';
-await clinguini(process.argv.slice(2), {
+await clinguini({
  name: 'consumer', utils: { help: true },
  commands: [command({ name: 'add', params: [{ name: 'id' }], handler: async ({ params }) => {
   await Promise.resolve();
@@ -43,6 +43,17 @@ await clinguini(process.argv.slice(2), {
 		execute('node', ['cli.js', 'add', 'fail'], directory, '', 1).stderr,
 		/Handler failed/
 	);
+	writeFileSync(
+		join(directory, 'override.js'),
+		`
+import { clinguini } from 'clinguini';
+await clinguini({
+ name: 'consumer', params: [{ name: 'id' }],
+ handler: ({ params }) => console.log(params.id)
+}, Object.freeze(['override']));
+`
+	);
+	assert.equal(execute('node', ['override.js', '--unknown'], directory).stdout.trim(), 'override');
 	for (const path of ['args', 'dist/args/index.js', 'types.ts', 'package.json'])
 		assert.match(
 			execute(
@@ -63,7 +74,9 @@ const handler: Handler = async ({ params, flags }) => { String(params.id); Numbe
 const option: Flag = flag({ name: 'jobs', type: 'number', default: 4 });
 const argument: Param = param({ name: 'id' });
 const config: Command = command({ name: 'tool', params: [argument], flags: [option], handler });
-await clinguini(['id'], config);
+await clinguini(config);
+const args: readonly string[] = ['id'];
+await clinguini(config, args);
 `
 	);
 	execute(

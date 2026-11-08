@@ -21,7 +21,7 @@ for (const args of [
 				handler: () => assert.fail('Help ran a handler')
 			}))
 		};
-		const result = await capture(() => clinguini(args, config));
+		const result = await capture(() => clinguini(config, args));
 		assert.equal(result.exitCode, 0);
 		assert.equal(result.stderr, '');
 		assert.match(result.stdout, /Usage: bref-ui/);
@@ -42,7 +42,7 @@ test('nested help describes the full command path, params, flags and children', 
 			}
 		]
 	};
-	const result = await capture(() => clinguini(['config', '-h'], config));
+	const result = await capture(() => clinguini(config, ['config', '-h']));
 	for (const text of [
 		'Usage: tool config <command> [file] [options]',
 		'Manage config',
@@ -70,11 +70,11 @@ test('utilities inherit, can be disabled and do not mutate the schema', async ()
 		]
 	};
 	const before = JSON.stringify(config);
-	const result = await capture(() => clinguini(['run', '--help', 'custom'], config));
+	const result = await capture(() => clinguini(config, ['run', '--help', 'custom']));
 	assert.deepEqual(values.flags, { help: 'custom' });
 	assert.equal(result.stdout, '');
 	assert.equal(JSON.stringify(config), before);
-	assert.equal((await capture(() => clinguini(['run', '-h'], config))).exitCode, 2);
+	assert.equal((await capture(() => clinguini(config, ['run', '-h']))).exitCode, 2);
 });
 
 test('selected header prints once and verbose diagnostics stay out of handler flags', async () => {
@@ -92,11 +92,11 @@ test('selected header prints once and verbose diagnostics stay out of handler fl
 			}
 		]
 	};
-	const output = await capture(() => clinguini(['-v', 'run'], config));
+	const output = await capture(() => clinguini(config, ['-v', 'run']));
 	assert.equal(output.stdout, 'Child');
 	assert.equal(output.stderr, 'Running tool run.');
 	assert.deepEqual(values, { params: {}, flags: {} });
-	const help = await capture(() => clinguini(['run', '--help'], config));
+	const help = await capture(() => clinguini(config, ['run', '--help']));
 	assert.equal(help.stdout.split('\n').filter((line) => line === 'Child').length, 1);
 });
 
@@ -107,12 +107,15 @@ test('help and verbose flag collisions reject configuration before the handler',
 		{ name: 'verbose', type: 'boolean' }
 	]) {
 		const result = await capture(() =>
-			clinguini([], {
-				name: 'tool',
-				utils: { help: true, verbose: true },
-				flags: [flag],
-				handler: () => assert.fail('Conflicting flags ran')
-			})
+			clinguini(
+				{
+					name: 'tool',
+					utils: { help: true, verbose: true },
+					flags: [flag],
+					handler: () => assert.fail('Conflicting flags ran')
+				},
+				[]
+			)
 		);
 		assert.equal(result.exitCode, 2);
 		assert.match(result.stderr, /Duplicate flag/);
@@ -120,7 +123,7 @@ test('help and verbose flag collisions reject configuration before the handler',
 });
 
 test('a command without a handler shows help, including its header', async () => {
-	const result = await capture(() => clinguini([], { name: 'tool', utils: { header: 'Header' } }));
+	const result = await capture(() => clinguini({ name: 'tool', utils: { header: 'Header' } }, []));
 	assert.deepEqual(result, { stdout: 'Header\nUsage: tool', stderr: '', exitCode: 0 });
 });
 
@@ -135,7 +138,7 @@ test('the separator and inline string values preserve literal help tokens', asyn
 			values = args;
 		}
 	};
-	const result = await capture(() => clinguini(['--text=--help', '--', '--help'], config));
+	const result = await capture(() => clinguini(config, ['--text=--help', '--', '--help']));
 	assert.equal(result.exitCode, 0);
 	assert.deepEqual(values, { params: { id: '--help' }, flags: { text: '--help' } });
 });
@@ -149,7 +152,7 @@ test('root help recursively includes nested commands and siblings with one heade
 			{ name: 'list' }
 		]
 	};
-	const result = await capture(() => clinguini(['--help'], config));
+	const result = await capture(() => clinguini(config, ['--help']));
 	assert.equal(result.exitCode, 0);
 	assert.match(result.stdout, /Usage: tool config set <key> \[options\]/);
 	assert.match(result.stdout, /Usage: tool list \[options\]/);

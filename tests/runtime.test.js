@@ -22,19 +22,22 @@ test('awaits only the selected handler with parsed params and local flags', asyn
 			}
 		]
 	};
-	const output = await capture(() => clinguini(['--profile', 'main', 'run', 'check'], config));
+	const output = await capture(() => clinguini(config, ['--profile', 'main', 'run', 'check']));
 	assert.deepEqual(result, { params: { id: 'check' }, flags: { jobs: 4 } });
 	assert.deepEqual(output, { stdout: '', stderr: '', exitCode: 0 });
 });
 
 test('runs a root handler and preserves application exit codes', async () => {
 	const output = await capture(() =>
-		clinguini([], {
-			name: 'tool',
-			handler: () => {
-				process.exitCode = 7;
-			}
-		})
+		clinguini(
+			{
+				name: 'tool',
+				handler: () => {
+					process.exitCode = 7;
+				}
+			},
+			[]
+		)
 	);
 	assert.equal(output.exitCode, 7);
 });
@@ -48,7 +51,7 @@ for (const args of [['missing'], ['add'], ['add', 'button', 'extra'], ['init', '
 				handler: () => assert.fail('Invalid arguments ran a handler')
 			}))
 		};
-		const result = await capture(() => clinguini(args, config));
+		const result = await capture(() => clinguini(config, args));
 		assert.equal(result.exitCode, 2);
 		assert.match(result.stderr, /^Error: /);
 	});
@@ -61,18 +64,21 @@ test('handler errors are reported with code 1; verbose includes the stack', asyn
 			throw new Error('Failed');
 		}
 	};
-	const regular = await capture(() => clinguini([], config));
+	const regular = await capture(() => clinguini(config, []));
 	assert.deepEqual(regular, { stdout: '', stderr: 'Error: Failed', exitCode: 1 });
-	const verbose = await capture(() => clinguini(['--verbose'], config));
+	const verbose = await capture(() => clinguini(config, ['--verbose']));
 	assert.equal(verbose.exitCode, 1);
 	assert.match(verbose.stderr, /Running tool\.\nError: Failed\n\s+at /);
 	const nonError = await capture(() =>
-		clinguini([], {
-			name: 'tool',
-			handler: () => {
-				throw 'Failure';
-			}
-		})
+		clinguini(
+			{
+				name: 'tool',
+				handler: () => {
+					throw 'Failure';
+				}
+			},
+			[]
+		)
 	);
 	assert.equal(nonError.stderr, 'Error: Failure');
 });
@@ -104,7 +110,7 @@ test('agent-tests command shapes reach their handlers unchanged', async () => {
 				}
 			}))
 		};
-		const result = await capture(() => clinguini(args, config));
+		const result = await capture(() => clinguini(config, args));
 		assert.equal(result.exitCode, 0, result.stderr);
 		assert.equal(called.name, args[0]);
 		if (args[0] === 'add') assert.deepEqual(called.params, { id: 'id', targetDir: args[2] });

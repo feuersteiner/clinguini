@@ -4,16 +4,25 @@
 
 ## Public API
 
-| Export                    | Purpose                                                 |
-| ------------------------- | ------------------------------------------------------- |
-| `clinguini(args, config)` | Parse arguments, show help or run the selected handler. |
-| `command(config)`         | Define a reusable command without executing it.         |
-| `flag(config)`            | Define a reusable flag.                                 |
-| `param(config)`           | Define a reusable positional parameter.                 |
+| Export                     | Purpose                                                 |
+| -------------------------- | ------------------------------------------------------- |
+| `clinguini(config, args?)` | Parse arguments, show help or run the selected handler. |
+| `command(config)`          | Define a reusable command without executing it.         |
+| `flag(config)`             | Define a reusable flag.                                 |
+| `param(config)`            | Define a reusable positional parameter.                 |
 
 The helpers return shallow copies. `flag` and `param` preserve inferred literal types;
 `command` returns `Command`. TypeScript also exports the `Command`, `Flag`, `Param`
 and `Handler` types. Helpers do not validate configuration; parsing does.
+
+`await clinguini(config)` parses `process.argv.slice(2)` at call time. For tests or
+programmatic use, pass a `readonly string[]` as the second argument:
+
+```typescript
+await clinguini(config, ['run', '--changed']);
+```
+
+An explicit array replaces process arguments; `[]` parses no arguments.
 
 ## Compose commands
 
@@ -28,7 +37,7 @@ import { clinguini } from 'clinguini';
 import { run } from './commands/run.js';
 import { add } from './commands/add.js';
 
-await clinguini(process.argv.slice(2), {
+await clinguini({
 	name: 'agent-tests',
 	description: 'Run checks against a repository',
 	commands: [run, add],

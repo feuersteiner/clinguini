@@ -5,7 +5,7 @@ A very tiny CLI builder. Yes, another one.
 [![npm](https://img.shields.io/npm/v/clinguini?logo=npm)](https://www.npmjs.com/package/clinguini)
 [![Discord](https://img.shields.io/badge/Discord-Join-5865F2?logo=discord&logoColor=white)](https://discord.gg/D2qy7DNEFz)
 [![MIT license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![minified + gzip](https://img.shields.io/badge/min%2Bgzip-1.89_KiB-brightgreen)](#how-tiny)
+[![minified + gzip](https://img.shields.io/badge/min%2Bgzip-1.90_KiB-brightgreen)](#how-tiny)
 
 Commands, params, flags and generated help. Written in TypeScript. Runs on Node.js.
 Zero runtime dependencies. The dependency tree is a stump.
@@ -23,7 +23,7 @@ Save as `cli.mjs`:
 ```javascript
 import { clinguini } from 'clinguini';
 
-await clinguini(process.argv.slice(2), {
+await clinguini({
 	name: 'greet',
 	description: 'Say hello from the terminal',
 	params: [{ name: 'name' }],
@@ -47,6 +47,8 @@ node cli.mjs --help
 ```
 
 The same API works in TypeScript; this example runs directly on Node.js.
+Arguments default to `process.argv.slice(2)`. Pass an explicit array as the second
+argument for tests or programmatic use: `await clinguini(config, ['Ada', '--loud'])`.
 
 ## The essentials
 
@@ -60,7 +62,7 @@ for examples and argument rules.
 
 ## How tiny?
 
-**1.89 KiB minified + gzip** (1,937 bytes) for the `0.1.1` public runtime,
+**1.90 KiB minified + gzip** (1,950 bytes) for the `0.1.1` public runtime,
 bundled with Bun 1.3.4. Measured, since apparently “very” is not a unit.
 
 Reproduce from a checkout with Bun installed:
@@ -70,7 +72,7 @@ bun install --frozen-lockfile
 bun run build
 bun build ./dist/index.js --target=node --format=esm --minify --outfile=/tmp/clinguini.min.mjs
 gzip -9 -n -c /tmp/clinguini.min.mjs | wc -c
-# 1937
+# 1950
 ```
 
 This measures the bundled runtime. The npm package also ships unminified JavaScript,

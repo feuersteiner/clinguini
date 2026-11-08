@@ -18,7 +18,7 @@ test('custom help is inherited, awaited and bypasses required params and action 
 	};
 	for (const args of [[], ['--help'], ['add', '-h']]) {
 		completed = false;
-		const result = await capture(() => clinguini(args, config));
+		const result = await capture(() => clinguini(config, args));
 		assert.deepEqual(result, { stdout: 'Existing help', stderr: '', exitCode: 0 });
 		assert.equal(completed, true);
 	}
@@ -39,28 +39,31 @@ test('argument error overrides preserve application diagnostics without hiding h
 		]
 	};
 	for (const args of [['missing'], ['add'], ['add', '--unknown'], ['add', 'id', 'extra']])
-		assert.deepEqual(await capture(() => clinguini(args, config)), {
+		assert.deepEqual(await capture(() => clinguini(config, args)), {
 			stdout: '',
 			stderr: 'Error: Existing usage error',
 			exitCode: 1
 		});
 	assert.equal(
-		(await capture(() => clinguini(['add', 'id'], config))).stderr,
+		(await capture(() => clinguini(config, ['add', 'id']))).stderr,
 		'Error: Application failed'
 	);
 });
 
 test('custom help failures use handler error reporting', async () => {
 	const result = await capture(() =>
-		clinguini(['--help'], {
-			name: 'tool',
-			utils: {
-				help: async () => {
-					throw new Error('Help failed');
-				},
-				argumentError: { message: 'Argument error', exitCode: 7 }
-			}
-		})
+		clinguini(
+			{
+				name: 'tool',
+				utils: {
+					help: async () => {
+						throw new Error('Help failed');
+					},
+					argumentError: { message: 'Argument error', exitCode: 7 }
+				}
+			},
+			['--help']
+		)
 	);
 	assert.deepEqual(result, { stdout: '', stderr: 'Error: Help failed', exitCode: 1 });
 });
